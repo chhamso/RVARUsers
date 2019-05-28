@@ -61,3 +61,6 @@ list_storage_files(cont)
 
 pcap <- download_blob(cont, src = "20150728Mixed.csv", dest = NULL)
 View(pcap)
+
+# install packages for r Markdown
+install.packages(c("htmltools", "caTools", "bitops", "base64enc", "rmarkdown"))
