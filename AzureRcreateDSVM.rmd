@@ -1,0 +1,47 @@
+---
+title: "create DSVM"
+author: "Christian Hamson"
+date: "May 28, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Do some basic work using the AzureR packages
+Run the RVARusers.R script first
+
+```{r}
+library(AzureRMR)
+az <- get_azure_login()
+az
+az$list_subscriptions()
+```
+
+Now create a VM using the AzureVM package
+There are just a few images prebuilt, but you can deploy your own
+template. I will use a prebuilt image for the DSVM
+create a key using ssh-keygen if you don't already have one.
+It isn't too horrible to have your subscription id exposed, but I've created a secret for my subscription id using the keyringr package. AzSubID is the name I've given to my subscription id
+
+```{r}
+install.packages("AzureVM")
+library(AzureVM)
+
+install.packages("keyringr")
+library(keyringr)
+credential_label <- "AzSubID"
+credential_path <- paste(Sys.getenv("USERPROFILE"), '\\DPAPI\\passwords\\', Sys.info()["nodename"], '\\', credential_label, '.txt', sep="")
+sub1 <- az$get_subscription(decrypt_dpapi_pw(credential_path))
+
+
+rg <- sub1$create_resource_group("chrisDaily", location = "eastus")
+rg
+
+key <- readLines("C://Users//chhamso//.ssh//id_rsa.pub")
+chrisDaily <- rg$create_vm("chrisdaily", username="chhamso", passkey=key, userauth_type="key", os="Ubuntu")
+chrisDaily
+```
+
+After all the above is done you can login to your new vm via ssh or X2Go if you'd like a desktop. 
